@@ -1,0 +1,280 @@
+---
+title: "state_housing_affordablity_data"
+author: "Jorge R. Soldevila Irizarry"
+date: "`r Sys.Date()`"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Source central setup file
+source(here::here("./scripts/00_project_setup.R"))
+
+# Remove scientific notation
+options(scipen = 999,
+        tigris_use_cache = TRUE
+)
+```
+
+# This scripts downloads and calculates Housing Costs for Units with a Mortgage and without a Mortgage for Both Hispanics and Total Population in NYS.
+
+## The data used for the analysis comes from table B25140 and B25140I, S20506, S207, and DP04 from the US Census Bureau.
+
+## Total Population
+
+### Cost Burden
+
+```{r Total Pop Housing Burden, message=FALSE, warning=FALSE}
+
+# To obtain data from the U.S. Census we use tidycensus and the get_acs() function.
+
+st_burden <- get_acs(
+  geography = "state",
+  state = "NY",
+  year = 2024,
+  survey = "acs5",
+  table = "B25140",
+  geometry = TRUE,
+  output = "wide"
+) %>%
+  mutate(
+    mort_30pct = round(B25140_003E/B25140_002E*100,2),
+         mort_50pct = round(B25140_004E/B25140_002E*100,2),
+         nomort_30pct = round(B25140_007E/B25140_006E*100,2),
+         nomort_50pct = round(B25140_008E/B25140_006E*100,2),
+         rent_30pct = round(B25140_011E/B25140_010E*100,2),
+         rent_50pct = round(B25140_012E/B25140_010E*100,2)
+    ) %>%
+  select(GEOID,NAME,mort_30pct,mort_50pct,nomort_30pct,nomort_50pct,rent_30pct,
+         rent_50pct)
+```
+
+### Display Burden Data
+
+```{r 30% Household Burden Map, message=FALSE, warning=FALSE}
+
+ggplot(
+  st_burden) +
+  geom_sf(aes(fill = mort_30pct)) +
+  ggtitle(label = "Owned Units with a mortgage with Housing Costs Over 30% of Household Income") +
+  theme_void() +
+  scale_fill_viridis_c(option = "magma", 
+                       direction = -1)
+
+ggplot(
+  st_burden) +
+  geom_sf(aes(fill = mort_50pct)) +
+  ggtitle(label = "Owned Units with a mortgage with Housing Costs Over 50% of Household Income") +
+  theme_void() +
+  scale_fill_viridis_c(option = "magma", direction = -1)
+  
+ggplot(
+  st_burden) +
+  geom_sf(aes(fill = nomort_30pct)) +
+  ggtitle(label = "Owned Units without a mortgage with Housing Costs Over 30% of Household Income") +
+  theme_void() +
+  scale_fill_viridis_c(option = "magma", direction = -1)
+
+ggplot(
+  st_burden) +
+  geom_sf(aes(fill = nomort_50pct)) +
+  ggtitle(label = "Owned Units without a mortgage with Housing Costs Over 50% of Household Income") +
+  theme_void() +
+  scale_fill_viridis_c(option = "magma", direction = -1)
+
+ggplot(
+  st_burden) +
+  geom_sf(aes(fill = rent_30pct)) +
+  ggtitle(label = "Rented Units with Housing Costs Over 30% of Household Income") +
+  theme_void() +
+  scale_fill_viridis_c(option = "magma", direction = -1)
+
+ggplot(
+  st_burden) +
+  geom_sf(aes(fill = mort_50pct)) +
+  ggtitle(label = "Rented Units with Housing Costs Over 50% of Household Income") +
+  theme_void() +
+  scale_fill_viridis_c(option = "magma", direction = -1)
+```
+
+### Monthly Costs for Units with a Mortgage
+
+```{r Cost with Mortgage, message=FALSE, warning=FALSE}
+
+st_cost_wth_mort <- get_acs(
+  geography = "state",
+  state = "NY",
+  year = 2024,
+  survey = "acs5",
+  table = "S2506",
+  geometry = TRUE,
+  output = "wide"
+) %>%
+  select(GEOID, 
+         S2506_C01_001E, # Total Owner Occupied Housing Units with Mortgage
+         S2506_C01_009E, # Owner Occupied Housing Units with Mortgage Median Home Value
+         S2506_C01_024E, # Owner Occupied Housing Units with Mortgage Median Household Income
+         S2506_C01_027E, # Home Value to Household Income Ratio 3 to 3.9
+         S2506_C01_028E, # Home Value to Household Income Ratio 4 or >
+         S2506_C01_040E, # Owner Occupied Housing Units with Mortgage Monthly Housing Costs in Median Dollars
+         S2506_C02_066E  # Owner Occupied Housing Units with Mortgage Median Real Estate Taxes
+         )
+```
+
+### Monthly Costs for Units without a Mortgage
+
+```{r Cost without Mortgage, message=FALSE, warning=FALSE}
+
+st_cost_wth_no_mort <- get_acs(
+  geography = "state",
+  state = "NY",
+  year = 2024,
+  survey = "acs5",
+  table = "S2507",
+  geometry = TRUE,
+  output = "wide"
+) %>%
+  select(GEOID,
+         S2507_C01_001E, # Total Owner Occupied Housing Units without Mortgage
+         S2507_C01_010E, # Owner Occupied Housing Units without Mortgage Median Home Value
+         S2507_C01_019E, # Owner Occupied Housing Units without Mortgage Median Household Income
+         S2507_C01_022E, # Home Value to Household Income Ratio 3 to 3.9
+         S2507_C01_023E, # Home Value to Household Income Ratio 4 or >
+         S2507_C01_032E, # Owner Occupied Housing Units without Mortgage Monthly Housing Costs in Median Dollars
+         S2507_C02_058E  # Owner Occupied Housing Units without Mortgage Median Real Estate Taxes
+         )
+```
+
+### Housing Characteristics
+
+```{r Cost with Mortgage, message=FALSE, warning=FALSE}
+
+st_hous_charc <- get_acs(
+  geography = "state",
+  state = "NY",
+  year = 2024,
+  survey = "acs5",
+  table = "DP04",
+  geometry = TRUE,
+  output = "wide"
+) %>%
+  select(GEOID, 
+         DP04_0001E, # Total Housing Units
+         DP04_0002E, # Occupied Housing Units
+         DP04_0003E, # Vacant Housing Units
+         DP04_0004E, # Homeowner Vacancy Rate
+         DP04_0005E, # Renter Vacancy Rate
+         DP04_0046E, # Total Owner Occupied Housing Units
+         DP04_0047E, # Total Renter Occupied Housing Units
+         DP04_0101E, # Median SMOC with Mortgage
+         DP04_0109E, # Median SMOC without Mortgage
+         DP04_0134E   # Median Gross Rent
+  )
+```
+
+## Hispanic Population Burden
+
+```{r Hispanic Pop Housing Burden, message=FALSE, warning=FALSE}
+
+hisp_st_burden <- get_acs(
+  geography = "state",
+  state = "NY",
+  year = 2024,
+  survey = "acs5",
+  table = "B25140I",
+  geometry = TRUE,
+  output = "wide"
+) %>%
+  mutate(
+    hisp_mort_30pct = round(B25140I_003E/B25140I_002E*100,2),
+         hisp_mort_50pct = round(B25140I_004E/B25140I_002E*100,2),
+         hisp_nomort_30pct = round(B25140I_007E/B25140I_006E*100,2),
+         hisp_nomort_50pct = round(B25140I_008E/B25140I_006E*100,2),
+         hisp_rent_30pct = round(B25140I_011E/B25140I_010E*100,2),
+         hisp_rent_50pct = round(B25140I_012E/B25140I_010E*100,2)
+    ) %>%
+  select(GEOID,hisp_mort_30pct,hisp_mort_50pct,hisp_nomort_30pct,
+         hisp_nomort_50pct,hisp_rent_30pct,hisp_rent_50pct)
+```
+
+## Hispanic Majority and Plurality Calculations
+
+```{r Hispanic Majority and Plurality Calculations, message=FALSE, warning=FALSE}
+
+st_hisp_calc <- get_acs(
+  geography = "state",
+  state = "NY",
+  year = 2024,
+  survey = "acs5",
+  table = "DP05",
+  geometry = TRUE,
+  output = "wide"
+) %>%
+  mutate(pct_hisp = DP05_0090E/DP05_0089E*100,
+         pct_wht = DP05_0096E/DP05_0089E*100,
+         pct_blk = DP05_0097E/DP05_0089E*100,
+         pct_aian = DP05_0098E/DP05_0089E*100,
+         pct_asi = DP05_0099E/DP05_0089E*100,
+         pct_oth = DP05_0101E/DP05_0089E*100,
+         hisp_maj = case_when(pct_hisp > 50 ~ "majority",
+                              TRUE ~ "not moajority"),
+         largest_other = pmax(pct_wht,
+                              pct_blk,
+                              pct_aian,
+                              pct_asi,
+                              pct_oth,
+                              na.rm = TRUE),
+
+         hisp_plurality = case_when(
+         pct_hisp > largest_other ~ "largest group",
+            TRUE ~ "not largest group"),
+         largest_group = case_when(
+           pct_hisp >= pmax(pct_wht, pct_blk, pct_aian, pct_asi, pct_oth, na.rm = TRUE) ~ "Hispanic",
+           pct_wht  >= pmax(pct_blk, pct_aian, pct_asi, pct_oth, na.rm = TRUE) ~ "White",
+           pct_blk  >= pmax(pct_aian, pct_asi, pct_oth, na.rm = TRUE) ~ "Black",
+           pct_aian >= pmax(pct_asi, pct_oth, na.rm = TRUE) ~ "AIAN",
+           pct_asi  >= pct_oth ~ "Asian",
+           TRUE ~ "Other")
+) %>%
+  select(GEOID, DP05_0089E,
+         pct_hisp,
+         pct_wht,
+         pct_blk,
+         hisp_maj,
+         hisp_plurality,
+         largest_group)
+
+```
+
+## Join Data Frames and export to ESRi
+
+```{r Join data and Export}
+
+state_list <- list(st_burden,st_cost_wth_mort, st_cost_wth_no_mort,
+                    st_hous_charc,hisp_st_burden,st_hisp_calc)
+
+state_df <- state_list |>
+  map(~ st_drop_geometry(.x)) |>
+  reduce(left_join, by = "GEOID")
+
+state_df <- st_burden |>
+  select(GEOID, geometry) |>
+  left_join(state_df, by = "GEOID") |>
+  st_as_sf()
+```
+
+```{r Export joined data frame, message=FALSE, warning=FALSE}
+
+st_write(
+  state_df,
+  here::here(
+    "output",
+    "state_housing_affordability.gpkg"
+  ),
+  delete_dsn = TRUE
+)
+
+```
+
+
