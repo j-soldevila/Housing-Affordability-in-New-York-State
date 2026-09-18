@@ -45,9 +45,9 @@ county_affordability <- build_housing_affordability(
 # )
 ```
 
-## Display Burden Data
+## Display Burden Data Total Population
 
-## Owned Units with a mortgage with Housing Costs Over 30% of Household Income
+### Owned Units with a mortgage with Housing Costs Over 30% of Household Income
 
 ```{r Owner with Mortgage 30%, message=FALSE, warning=FALSE}
 
@@ -59,7 +59,7 @@ interactive_housing_map(
 
 ```
 
-## Owner with a Mortgage with Housing Costs Over 50% of Household Income
+### Owner with a Mortgage with Housing Costs Over 50% of Household Income
 
 ```{r Owner with Mortgage 50%, message=FALSE, warning=FALSE}
 
@@ -69,3 +69,297 @@ interactive_housing_map(
   title = "Mortgage Cost Burden (>50%)"
 )
 ```
+
+### Owner without a Mortgage with Housing Costs Over 30% of Household Income
+
+```{r Owner without Mortgage 30%, message=FALSE, warning=FALSE}
+
+interactive_housing_map(
+  data = county_affordability,
+  variable = "nomort_30pct",
+  title = "Mortgage Cost Burden (>30%)"
+)
+```
+
+### Owner without a Mortgage with Housing Costs Over 50% of Household Income
+
+```{r Owner without Mortgage 50%, message=FALSE, warning=FALSE}
+
+interactive_housing_map(
+  data = county_affordability,
+  variable = "nomort_50pct",
+  title = "Mortgage Cost Burden (>50%)"
+)
+```
+
+### Rented Unit with Housing Costs Over 30% of Household Income
+
+```{r Rented 30%, message=FALSE, warning=FALSE}
+
+interactive_housing_map(
+  data = county_affordability,
+  variable = "rent_30pct",
+  title = "Cost Burden (>30%)"
+)
+```
+
+### Rented Unit with Housing Costs Over 50% of Household Income
+
+```{r Rented 50%, message=FALSE, warning=FALSE}
+
+interactive_housing_map(
+  data = county_affordability,
+  variable = "rent_50pct",
+  title = "Cost Burden (>50%)"
+)
+```
+
+### Total Households with Housing Costs Over 30% of Household Income
+
+```{r Total Costs 30%, message=FALSE, warning=FALSE}
+
+interactive_housing_map(
+  data = county_affordability,
+  variable = "tot_30pct",
+  title = "Cost Burden (>30%)"
+)
+```
+
+### Total Households with Housing Costs Over 50% of Household Income
+
+```{r Total Costs 50%, message=FALSE, warning=FALSE}
+
+interactive_housing_map(
+  data = county_affordability,
+  variable = "tot_50pct",
+  title = "Cost Burden (>50%)"
+)
+```
+
+
+## Display Burden Data Hispanic Populaiton
+
+### Hispanic Owned Units with a mortgage with Housing Costs Over 30% of Household Income
+
+```{r Hispanic Owner with Mortgage 30%, message=FALSE, warning=FALSE}
+
+interactive_housing_map(
+  data = county_affordability,
+  variable = "hisp_mort_30pct",
+  title = "Mortgage Cost Burden (>30%)"
+)
+
+```
+
+### Hispanic Owner with a Mortgage with Housing Costs Over 50% of Household Income
+
+```{r Hispanic Owner with Mortgage 50%, message=FALSE, warning=FALSE}
+
+interactive_housing_map(
+  data = county_affordability,
+  variable = "hisp_mort_50pct",
+  title = "Mortgage Cost Burden (>50%)"
+)
+```
+
+### Hispanic Owner without a Mortgage with Housing Costs Over 30% of Household Income
+
+```{r Hispanic Owner without Mortgage 30%, message=FALSE, warning=FALSE}
+
+interactive_housing_map(
+  data = county_affordability,
+  variable = "hisp_nomort_30pct",
+  title = "Mortgage Cost Burden (>30%)"
+)
+```
+
+### Hispanic Owner without a Mortgage with Housing Costs Over 50% of Household Income
+
+```{r Hispanic Owner without Mortgage 50%, message=FALSE, warning=FALSE}
+
+interactive_housing_map(
+  data = county_affordability,
+  variable = "hisp_nomort_50pct",
+  title = "Mortgage Cost Burden (>50%)"
+)
+```
+
+### Hispanic Rented Unit with Housing Costs Over 30% of Household Income
+
+```{r Hispanic Rented 30%, message=FALSE, warning=FALSE}
+
+interactive_housing_map(
+  data = county_affordability,
+  variable = "hisp_rent_30pct",
+  title = "Cost Burden (>30%)"
+)
+```
+
+### Hispanic Rented Unit with Housing Costs Over 50% of Household Income
+
+```{r Hispanic Rented 50%, message=FALSE, warning=FALSE}
+
+interactive_housing_map(
+  data = county_affordability,
+  variable = "hisp_rent_50pct",
+  title = "Cost Burden (>50%)"
+)
+```
+
+### Hispanic Households with Housing Costs Over 30% of Household Income
+
+```{r Hispanic Costs 30%, message=FALSE, warning=FALSE}
+
+interactive_housing_map(
+  data = county_affordability,
+  variable = "hisp_tot_30pct",
+  title = "Cost Burden (>30%)"
+)
+```
+
+### Hispanic Households with Housing Costs Over 50% of Household Income
+
+```{r Hispanic Costs 50%, message=FALSE, warning=FALSE}
+
+interactive_housing_map(
+  data = county_affordability,
+  variable = "hisp_tot_50pct",
+  title = "Cost Burden (>50%)"
+)
+```
+
+
+## Other Selected Housing Costs
+
+###Units with a Mortgage
+
+### Home Value to Household Income Ratio 3 to 3.9 Households with a Mortgage
+
+```{r Ratio 3 to 3.9 with mortgage, message=FALSE, warning=FALSE}
+
+interactive_housing_map(
+  data = county_affordability,
+  variable = "ratio_less4.x",
+  title = "Ratio 3 to 3.9"
+)
+```
+
+
+### Home Value to Household Income Ration Over 4 Households with a Mortgage
+
+```{r Ratio over 4 with mortgage, message=FALSE, warning=FALSE}
+
+interactive_housing_map(
+  data = county_affordability,
+  variable = "ratio_over4.x",
+  title = "Ratio 3 to 3.9"
+)
+```
+
+
+### Owner Occupied Housing Units with Mortgage Monthly Housing Costs in Median Dollars
+
+```{r Median Housing costs with mortgage, message=FALSE, warning=FALSE}
+
+interactive_housing_map(
+  data = county_affordability,
+  variable = "S2506_C01_040E",
+  title = "Median Dollars ($)"
+)
+```
+
+
+### Owner Occupied Housing Units with Mortgage Median Real Estate Taxes
+
+```{r Real Estate Taxes with mortgage, message=FALSE, warning=FALSE}
+
+interactive_housing_map(
+  data = county_affordability,
+  variable = "S2506_C02_066E",
+  title = "Median Dollars ($)"
+)
+```
+
+
+### Units without a mortgage
+
+### Home Value to Household Income Ratio 3 to 3.9 Households without a Mortgage
+
+```{r Ratio 3 to 3.9 no mortgage, message=FALSE, warning=FALSE}
+
+interactive_housing_map(
+  data = county_affordability,
+  variable = "ratio_less4.y",
+  title = "Ratio 3 to 3.9"
+)
+```
+
+
+### Home Value to Household Income Ration Over 4 Households without a Mortgage
+
+```{r Ratio Over 4 No mortgage, message=FALSE, warning=FALSE}
+
+interactive_housing_map(
+  data = county_affordability,
+  variable = "ratio_over4.y",
+  title = "Ratio 3 to 3.9"
+)
+```
+
+
+### Owner Occupied Housing Units without Mortgage Monthly Housing Costs in Median Dollars
+
+```{r Median Monthly costs no mortgage, message=FALSE, warning=FALSE}
+
+interactive_housing_map(
+  data = county_affordability,
+  variable = "S2507_C01_032E",
+  title = "Median Dollars ($)"
+)
+```
+
+
+### Owner Occupied Housing Units without Mortgage Median Real Estate Taxes
+
+```{r Reatl estate taxes no mortgage, message=FALSE, warning=FALSE}
+
+interactive_housing_map(
+  data = county_affordability,
+  variable = "S2507_C02_058E",
+  title = "Median Dollars ($)"
+)
+```
+
+
+## Housing characteristics
+
+### Median SMOC Households with a Mortgage
+
+```{r Median Smoc with Mortgage, message=FALSE, warning=FALSE}
+interactive_housing_map(
+  data = county_affordability,
+  variable = "DP04_0101E",
+  title = "Median Dollars ($)"
+)
+```
+
+### Median SMOC Households without a Mortgage
+
+```{r Median Smoc without Mortgage, message=FALSE, warning=FALSE}
+interactive_housing_map(
+  data = county_affordability,
+  variable = "DP04_0109E",
+  title = "Median Dollars ($)"
+)
+```
+
+### Median Gross Rent
+
+```{r Median Gross Rent, message=FALSE, warning=FALSE}
+interactive_housing_map(
+  data = county_affordability,
+  variable = "DP04_0134E",
+  title = "Median Dollars ($)"
+)
+```
+

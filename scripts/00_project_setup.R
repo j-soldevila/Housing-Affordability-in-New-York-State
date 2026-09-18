@@ -69,6 +69,10 @@ build_housing_affordability <- function(
     geometry = FALSE,
     output = "wide"
   ) %>%
+    dplyr::mutate(
+      ratio_less4 = round(S2506_C01_027E/S2506_C01_001E*100,2),
+      ratio_over4 = round(S2506_C01_028E/S2506_C01_001E*100,2)
+    ) %>%
     dplyr::select(
       GEOID,
       S2506_C01_001E, # Total Owner Occupied Housing Units with Mortgage
@@ -77,7 +81,9 @@ build_housing_affordability <- function(
       S2506_C01_027E, # Home Value to Household Income Ratio 3 to 3.9
       S2506_C01_028E, # Home Value to Household Income Ratio 4 or >
       S2506_C01_040E, # Owner Occupied Housing Units with Mortgage Monthly Housing Costs in Median Dollars
-      S2506_C02_066E  # Owner Occupied Housing Units with Mortgage Median Real Estate Taxes
+      S2506_C02_066E,  # Owner Occupied Housing Units with Mortgage Median Real Estate Taxes
+      ratio_less4,
+      ratio_over4
     )
   
   #--------------------------------------------------------------------------
@@ -93,6 +99,10 @@ build_housing_affordability <- function(
     geometry = FALSE,
     output = "wide"
   ) %>%
+    dplyr::mutate(
+      ratio_less4 = round(S2507_C01_022E/S2507_C01_001E*100,2),
+      ratio_over4 = round(S2507_C01_023E/S2507_C01_001E*100,2)
+    ) %>%
     dplyr::select(
       GEOID,
       S2507_C01_001E, # Total Owner Occupied Housing Units without Mortgage
@@ -101,7 +111,9 @@ build_housing_affordability <- function(
       S2507_C01_022E, # Home Value to Household Income Ratio 3 to 3.9
       S2507_C01_023E, # Home Value to Household Income Ratio 4 or >
       S2507_C01_032E, # Owner Occupied Housing Units without Mortgage Monthly Housing Costs in Median Dollars
-      S2507_C02_058E  # Owner Occupied Housing Units without Mortgage Median Real Estate Taxes
+      S2507_C02_058E,  # Owner Occupied Housing Units without Mortgage Median Real Estate Taxes
+      ratio_less4,
+      ratio_over4
     )
   
   #--------------------------------------------------------------------------
@@ -150,7 +162,13 @@ build_housing_affordability <- function(
       hisp_nomort_30pct = round(B25140I_007E / B25140I_006E * 100, 2),
       hisp_nomort_50pct = round(B25140I_008E / B25140I_006E * 100, 2),
       hisp_rent_30pct   = round(B25140I_011E / B25140I_010E * 100, 2),
-      hisp_rent_50pct   = round(B25140I_012E / B25140I_010E * 100, 2)
+      hisp_rent_50pct   = round(B25140I_012E / B25140I_010E * 100, 2),
+      hisp_tot_30pct    = round(
+        (B25140I_003E + B25140I_007E + B25140I_011E) /
+          B25140I_001E * 100,2),
+      hisp_tot_50pct    = round(
+        (B25140I_004E + B25140I_008E + B25140I_012E) /
+          B25140I_001E * 100,2)
     ) %>%
     dplyr::select(
       GEOID,

@@ -2,7 +2,7 @@
 title: "senate_housing_affordablity_data"
 author: "Jorge R. Soldevila Irizarry"
 date: "`r Sys.Date()`"
-output: github_document
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
@@ -17,262 +17,348 @@ options(scipen = 999,
 )
 ```
 
-# This scripts downloads and calculates Housing Costs for  Units with a Mortgage and without a Mortgage for Both Hispanics and Total Population in NYS.
+# This scripts downloads and calculates Housing Costs for Units with a Mortgage and without a Mortgage for Both Hispanics and Total Population in NYS using the function stored in the project setup file (00_project_setup.R).
 
-## The data used for the analysis comes from table B25140 and B25140I, S20506, S207, and DP04 from the US Census Bureau. 
+## The data used for the analysis comes from table B25140 and B25140I, S20506, S207, and DP04 from the US Census Bureau.
 
-### Cost Burden
+### Housing Cost Burden Calculations
 
-```{r Total Pop Housing Burden, message=FALSE, warning=FALSE}
+```{r Calculate housing cost burden and other data, message=FALSE, warning=FALSE}
 
-# To obtain data from the U.S. Census we use tidycensus and the get_acs() function.
-
-sen_burden <- get_acs(
+senate_affordability <- build_housing_affordability(
   geography = "state legislative district (upper chamber)",
   state = "NY",
   year = 2024,
-  survey = "acs5",
-  table = "B25140",
-  geometry = TRUE,
-  output = "wide"
-) %>%
-  mutate(
-    mort_30pct = round(B25140_003E/B25140_002E*100,2),
-         mort_50pct = round(B25140_004E/B25140_002E*100,2),
-         nomort_30pct = round(B25140_007E/B25140_006E*100,2),
-         nomort_50pct = round(B25140_008E/B25140_006E*100,2),
-         rent_30pct = round(B25140_011E/B25140_010E*100,2),
-         rent_50pct = round(B25140_012E/B25140_010E*100,2)
-    ) %>%
-  select(GEOID,NAME,mort_30pct,mort_50pct,nomort_30pct,nomort_50pct,rent_30pct,
-         rent_50pct)
+  survey = "acs5"
+)
 ```
 
-### Display Burden Data
+### Export County housing cost burden
 
-```{r 30% Household Burden Map, message=FALSE, warning=FALSE}
+```{r Export senate housing cost data, message=FALSE, warning=FALSE}
 
-ggplot(
-  sen_burden) +
-  geom_sf(aes(fill = mort_30pct)) +
-  ggtitle(label = "Owned Units with a mortgage with Housing Costs Over 30% of Household Income") +
-  theme_void() +
-  scale_fill_viridis_c(option = "magma", 
-                       direction = -1)
-
-ggplot(
-  sen_burden) +
-  geom_sf(aes(fill = mort_50pct)) +
-  ggtitle(label = "Owned Units with a mortgage with Housing Costs Over 50% of Household Income") +
-  theme_void() +
-  scale_fill_viridis_c(option = "magma", direction = -1)
-  
-ggplot(
-  sen_burden) +
-  geom_sf(aes(fill = nomort_30pct)) +
-  ggtitle(label = "Owned Units without a mortgage with Housing Costs Over 30% of Household Income") +
-  theme_void() +
-  scale_fill_viridis_c(option = "magma", direction = -1)
-
-ggplot(
-  sen_burden) +
-  geom_sf(aes(fill = nomort_50pct)) +
-  ggtitle(label = "Owned Units without a mortgage with Housing Costs Over 50% of Household Income") +
-  theme_void() +
-  scale_fill_viridis_c(option = "magma", direction = -1)
-
-ggplot(
-  sen_burden) +
-  geom_sf(aes(fill = rent_30pct)) +
-  ggtitle(label = "Rented Units with Housing Costs Over 30% of Household Income") +
-  theme_void() +
-  scale_fill_viridis_c(option = "magma", direction = -1)
-
-ggplot(
-  sen_burden) +
-  geom_sf(aes(fill = mort_50pct)) +
-  ggtitle(label = "Rented Units with Housing Costs Over 50% of Household Income") +
-  theme_void() +
-  scale_fill_viridis_c(option = "magma", direction = -1)
+# export_housing_affordability(
+#   data = senate_affordability,
+#   geography = "state legislative district (upper chamber)",
+#   state = "NY",
+#   year = 2024
+# )
 ```
 
-### Monthly Costs for Units with a Mortgage
+## Display Burden Data Total Population
 
-```{r Cost with Mortgage, message=FALSE, warning=FALSE}
+### Owned Units with a mortgage with Housing Costs Over 30% of Household Income
 
-sen_cost_wth_mort <- get_acs(
-  geography = "state legislative district (upper chamber)",
-  state = "NY",
-  year = 2024,
-  survey = "acs5",
-  table = "S2506",
-  geometry = TRUE,
-  output = "wide"
-) %>%
-  select(GEOID, 
-         S2506_C01_001E, # Total Owner Occupied Housing Units with Mortgage
-         S2506_C01_009E, # Owner Occupied Housing Units with Mortgage Median Home Value
-         S2506_C01_024E, # Owner Occupied Housing Units with Mortgage Median Household Income
-         S2506_C01_027E, # Home Value to Household Income Ratio 3 to 3.9
-         S2506_C01_028E, # Home Value to Household Income Ratio 4 or >
-         S2506_C01_040E, # Owner Occupied Housing Units with Mortgage Monthly Housing Costs in Median Dollars
-         S2506_C02_066E  # Owner Occupied Housing Units with Mortgage Median Real Estate Taxes
-         )
-```
+```{r Owner with Mortgage 30%, message=FALSE, warning=FALSE}
 
-### Monthly Costs for Units without a Mortgage
-
-```{r Cost without Mortgage, message=FALSE, warning=FALSE}
-
-sen_cost_wth_no_mort <- get_acs(
-  geography = "state legislative district (upper chamber)",
-  state = "NY",
-  year = 2024,
-  survey = "acs5",
-  table = "S2507",
-  geometry = TRUE,
-  output = "wide"
-) %>%
-  select(GEOID,
-         S2507_C01_001E, # Total Owner Occupied Housing Units without Mortgage
-         S2507_C01_010E, # Owner Occupied Housing Units without Mortgage Median Home Value
-         S2507_C01_019E, # Owner Occupied Housing Units without Mortgage Median Household Income
-         S2507_C01_022E, # Home Value to Household Income Ratio 3 to 3.9
-         S2507_C01_023E, # Home Value to Household Income Ratio 4 or >
-         S2507_C01_032E, # Owner Occupied Housing Units without Mortgage Monthly Housing Costs in Median Dollars
-         S2507_C02_058E  # Owner Occupied Housing Units without Mortgage Median Real Estate Taxes
-         )
-```
-
-### Housing Characteristics
-
-```{r Cost with Mortgage, message=FALSE, warning=FALSE}
-
-sen_hous_charc <- get_acs(
-  geography = "state legislative district (upper chamber)",
-  state = "NY",
-  year = 2024,
-  survey = "acs5",
-  table = "DP04",
-  geometry = TRUE,
-  output = "wide"
-) %>%
-  select(GEOID, 
-         DP04_0001E, # Total Housing Units
-         DP04_0002E, # Occupied Housing Units
-         DP04_0003E, # Vacant Housing Units
-         DP04_0004E, # Homeowner Vacancy Rate
-         DP04_0005E, # Renter Vacancy Rate
-         DP04_0046E, # Total Owner Occupied Housing Units
-         DP04_0047E, # Total Renter Occupied Housing Units
-         DP04_0101E, # Median SMOC with Mortgage
-         DP04_0109E, # Median SMOC without Mortgage
-         DP04_0134E   # Median Gross Rent
-  )
-```
-
-## Hispanic Population Burden
-
-```{r Hispanic Pop Housing Burden, message=FALSE, warning=FALSE}
-
-hisp_sen_burden <- get_acs(
-  geography = "state legislative district (upper chamber)",
-  state = "NY",
-  year = 2024,
-  survey = "acs5",
-  table = "B25140I",
-  geometry = TRUE,
-  output = "wide"
-) %>%
-  mutate(
-    hisp_mort_30pct = round(B25140I_003E/B25140I_002E*100,2),
-         hisp_mort_50pct = round(B25140I_004E/B25140I_002E*100,2),
-         hisp_nomort_30pct = round(B25140I_007E/B25140I_006E*100,2),
-         hisp_nomort_50pct = round(B25140I_008E/B25140I_006E*100,2),
-         hisp_rent_30pct = round(B25140I_011E/B25140I_010E*100,2),
-         hisp_rent_50pct = round(B25140I_012E/B25140I_010E*100,2)
-    ) %>%
-  select(GEOID,hisp_mort_30pct,hisp_mort_50pct,hisp_nomort_30pct,
-         hisp_nomort_50pct,hisp_rent_30pct,hisp_rent_50pct)
-```
-
-## Hispanic Majority and Plurality Calculations
-
-```{r Hispanic Majority and Plurality Calculations, message=FALSE, warning=FALSE}
-
-sen_hisp_calc <- get_acs(
-  geography = "state legislative district (upper chamber)",
-  state = "NY",
-  year = 2024,
-  survey = "acs5",
-  table = "DP05",
-  geometry = TRUE,
-  output = "wide"
-) %>%
-  mutate(pct_hisp = DP05_0090E/DP05_0089E*100,
-         pct_wht = DP05_0096E/DP05_0089E*100,
-         pct_blk = DP05_0097E/DP05_0089E*100,
-         pct_aian = DP05_0098E/DP05_0089E*100,
-         pct_asi = DP05_0099E/DP05_0089E*100,
-         pct_oth = DP05_0101E/DP05_0089E*100,
-         hisp_maj = case_when(pct_hisp > 50 ~ "majority",
-                              TRUE ~ "not moajority"),
-         largest_other = pmax(pct_wht,
-                              pct_blk,
-                              pct_aian,
-                              pct_asi,
-                              pct_oth,
-                              na.rm = TRUE),
-
-         hisp_plurality = case_when(
-         pct_hisp > largest_other ~ "largest group",
-            TRUE ~ "not largest group"),
-         largest_group = case_when(
-           pct_hisp >= pmax(pct_wht, pct_blk, pct_aian, pct_asi, pct_oth, na.rm = TRUE) ~ "Hispanic",
-           pct_wht  >= pmax(pct_blk, pct_aian, pct_asi, pct_oth, na.rm = TRUE) ~ "White",
-           pct_blk  >= pmax(pct_aian, pct_asi, pct_oth, na.rm = TRUE) ~ "Black",
-           pct_aian >= pmax(pct_asi, pct_oth, na.rm = TRUE) ~ "AIAN",
-           pct_asi  >= pct_oth ~ "Asian",
-           TRUE ~ "Other")
-) %>%
-  select(GEOID, DP05_0089E,
-         pct_hisp,
-         pct_wht,
-         pct_blk,
-         hisp_maj,
-         hisp_plurality,
-         largest_group)
-
-```
-
-## Join Data Frames and export to ESRi
-
-```{r Join data and Export}
-
-senate_list <- list(sen_burden,sen_cost_wth_mort, sen_cost_wth_no_mort,
-                    sen_hous_charc,hisp_sen_burden,sen_hisp_calc)
-
-senate_df <- senate_list |>
-  map(~ st_drop_geometry(.x)) |>
-  reduce(left_join, by = "GEOID")
-
-senate_df <- sen_burden |>
-  select(GEOID, geometry) |>
-  left_join(senate_df, by = "GEOID") |>
-  st_as_sf()
-```
-
-```{r Export joined data frame, message=FALSE, warning=FALSE}
-
-st_write(
-  senate_df,
-  here::here(
-    "output",
-    "senate_housing_affordability.gpkg"
-  ),
-  delete_dsn = TRUE
+interactive_housing_map(
+  data = senate_affordability,
+  variable = "mort_30pct",
+  title = "Mortgage Cost Burden (>30%)"
 )
 
 ```
 
+### Owner with a Mortgage with Housing Costs Over 50% of Household Income
 
+```{r Owner with Mortgage 50%, message=FALSE, warning=FALSE}
+
+interactive_housing_map(
+  data = senate_affordability,
+  variable = "mort_50pct",
+  title = "Mortgage Cost Burden (>50%)"
+)
+```
+
+### Owner without a Mortgage with Housing Costs Over 30% of Household Income
+
+```{r Owner without Mortgage 30%, message=FALSE, warning=FALSE}
+
+interactive_housing_map(
+  data = senate_affordability,
+  variable = "nomort_30pct",
+  title = "Mortgage Cost Burden (>30%)"
+)
+```
+
+### Owner without a Mortgage with Housing Costs Over 50% of Household Income
+
+```{r Owner without Mortgage 50%, message=FALSE, warning=FALSE}
+
+interactive_housing_map(
+  data = senate_affordability,
+  variable = "nomort_50pct",
+  title = "Mortgage Cost Burden (>50%)"
+)
+```
+
+### Rented Unit with Housing Costs Over 30% of Household Income
+
+```{r Rented 30%, message=FALSE, warning=FALSE}
+
+interactive_housing_map(
+  data = senate_affordability,
+  variable = "rent_30pct",
+  title = "Cost Burden (>30%)"
+)
+```
+
+### Rented Unit with Housing Costs Over 50% of Household Income
+
+```{r Rented 50%, message=FALSE, warning=FALSE}
+
+interactive_housing_map(
+  data = senate_affordability,
+  variable = "rent_50pct",
+  title = "Cost Burden (>50%)"
+)
+```
+
+### Total Households with Housing Costs Over 30% of Household Income
+
+```{r Total Costs 30%, message=FALSE, warning=FALSE}
+
+interactive_housing_map(
+  data = senate_affordability,
+  variable = "tot_30pct",
+  title = "Cost Burden (>30%)"
+)
+```
+
+### Total Households with Housing Costs Over 50% of Household Income
+
+```{r Total Costs 50%, message=FALSE, warning=FALSE}
+
+interactive_housing_map(
+  data = senate_affordability,
+  variable = "tot_50pct",
+  title = "Cost Burden (>50%)"
+)
+```
+
+
+## Display Burden Data Hispanic Populaiton
+
+### Hispanic Owned Units with a mortgage with Housing Costs Over 30% of Household Income
+
+```{r Hispanic Owner with Mortgage 30%, message=FALSE, warning=FALSE}
+
+interactive_housing_map(
+  data = senate_affordability,
+  variable = "hisp_mort_30pct",
+  title = "Mortgage Cost Burden (>30%)"
+)
+
+```
+
+### Hispanic Owner with a Mortgage with Housing Costs Over 50% of Household Income
+
+```{r Hispanic Owner with Mortgage 50%, message=FALSE, warning=FALSE}
+
+interactive_housing_map(
+  data = senate_affordability,
+  variable = "hisp_mort_50pct",
+  title = "Mortgage Cost Burden (>50%)"
+)
+```
+
+### Hispanic Owner without a Mortgage with Housing Costs Over 30% of Household Income
+
+```{r Hispanic Owner without Mortgage 30%, message=FALSE, warning=FALSE}
+
+interactive_housing_map(
+  data = senate_affordability,
+  variable = "hisp_nomort_30pct",
+  title = "Mortgage Cost Burden (>30%)"
+)
+```
+
+### Hispanic Owner without a Mortgage with Housing Costs Over 50% of Household Income
+
+```{r Hispanic Owner without Mortgage 50%, message=FALSE, warning=FALSE}
+
+interactive_housing_map(
+  data = senate_affordability,
+  variable = "hisp_nomort_50pct",
+  title = "Mortgage Cost Burden (>50%)"
+)
+```
+
+### Hispanic Rented Unit with Housing Costs Over 30% of Household Income
+
+```{r Hispanic Rented 30%, message=FALSE, warning=FALSE}
+
+interactive_housing_map(
+  data = senate_affordability,
+  variable = "hisp_rent_30pct",
+  title = "Cost Burden (>30%)"
+)
+```
+
+### Hispanic Rented Unit with Housing Costs Over 50% of Household Income
+
+```{r Hispanic Rented 50%, message=FALSE, warning=FALSE}
+
+interactive_housing_map(
+  data = senate_affordability,
+  variable = "hisp_rent_50pct",
+  title = "Cost Burden (>50%)"
+)
+```
+
+### Hispanic Households with Housing Costs Over 30% of Household Income
+
+```{r Hispanic Costs 30%, message=FALSE, warning=FALSE}
+
+interactive_housing_map(
+  data = senate_affordability,
+  variable = "hisp_tot_30pct",
+  title = "Cost Burden (>30%)"
+)
+```
+
+### Hispanic Households with Housing Costs Over 50% of Household Income
+
+```{r Hispanic Costs 50%, message=FALSE, warning=FALSE}
+
+interactive_housing_map(
+  data = senate_affordability,
+  variable = "hisp_tot_50pct",
+  title = "Cost Burden (>50%)"
+)
+```
+
+
+## Other Selected Housing Costs
+
+###Units with a Mortgage
+
+### Home Value to Household Income Ratio 3 to 3.9 Households with a Mortgage
+
+```{r Ratio 3 to 3.9 with mortgage, message=FALSE, warning=FALSE}
+
+interactive_housing_map(
+  data = senate_affordability,
+  variable = "ratio_less4.x",
+  title = "Ratio 3 to 3.9"
+)
+```
+
+
+### Home Value to Household Income Ration Over 4 Households with a Mortgage
+
+```{r Ratio over 4 with mortgage, message=FALSE, warning=FALSE}
+
+interactive_housing_map(
+  data = senate_affordability,
+  variable = "ratio_over4.x",
+  title = "Ratio 3 to 3.9"
+)
+```
+
+
+### Owner Occupied Housing Units with Mortgage Monthly Housing Costs in Median Dollars
+
+```{r Median Housing costs with mortgage, message=FALSE, warning=FALSE}
+
+interactive_housing_map(
+  data = senate_affordability,
+  variable = "S2506_C01_040E",
+  title = "Median Dollars ($)"
+)
+```
+
+
+### Owner Occupied Housing Units with Mortgage Median Real Estate Taxes
+
+```{r Real Estate Taxes with mortgage, message=FALSE, warning=FALSE}
+
+interactive_housing_map(
+  data = senate_affordability,
+  variable = "S2506_C02_066E",
+  title = "Median Dollars ($)"
+)
+```
+
+
+### Units without a mortgage
+
+### Home Value to Household Income Ratio 3 to 3.9 Households without a Mortgage
+
+```{r Ratio 3 to 3.9 no mortgage, message=FALSE, warning=FALSE}
+
+interactive_housing_map(
+  data = senate_affordability,
+  variable = "ratio_less4.y",
+  title = "Ratio 3 to 3.9"
+)
+```
+
+
+### Home Value to Household Income Ration Over 4 Households without a Mortgage
+
+```{r Ratio Over 4 No mortgage, message=FALSE, warning=FALSE}
+
+interactive_housing_map(
+  data = senate_affordability,
+  variable = "ratio_over4.y",
+  title = "Ratio 3 to 3.9"
+)
+```
+
+
+### Owner Occupied Housing Units without Mortgage Monthly Housing Costs in Median Dollars
+
+```{r Median Monthly costs no mortgage, message=FALSE, warning=FALSE}
+
+interactive_housing_map(
+  data = senate_affordability,
+  variable = "S2507_C01_032E",
+  title = "Median Dollars ($)"
+)
+```
+
+
+### Owner Occupied Housing Units without Mortgage Median Real Estate Taxes
+
+```{r Reatl estate taxes no mortgage, message=FALSE, warning=FALSE}
+
+interactive_housing_map(
+  data = senate_affordability,
+  variable = "S2507_C02_058E",
+  title = "Median Dollars ($)"
+)
+```
+
+
+## Housing characteristics
+
+### Median SMOC Households with a Mortgage
+
+```{r Median Smoc with Mortgage, message=FALSE, warning=FALSE}
+interactive_housing_map(
+  data = senate_affordability,
+  variable = "DP04_0101E",
+  title = "Median Dollars ($)"
+)
+```
+
+### Median SMOC Households without a Mortgage
+
+```{r Median Smoc without Mortgage, message=FALSE, warning=FALSE}
+interactive_housing_map(
+  data = senate_affordability,
+  variable = "DP04_0109E",
+  title = "Median Dollars ($)"
+)
+```
+
+### Median Gross Rent
+
+```{r Median Gross Rent, message=FALSE, warning=FALSE}
+interactive_housing_map(
+  data = senate_affordability,
+  variable = "DP04_0134E",
+  title = "Median Dollars ($)"
+)
+```
