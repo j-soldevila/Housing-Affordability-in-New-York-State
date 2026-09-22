@@ -4,6 +4,62 @@
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(tidyverse, tidycensus,sf,glue,here,leaflet)
 
+
+#===============================================================================
+# Generic Grouped Median Function
+#===============================================================================
+
+calculate_grouped_median <- function(
+    data,
+    freq_vars,
+    lower_bounds,
+    class_widths,
+    output_name = "grouped_median"
+) {
+  
+  stopifnot(
+    length(freq_vars) == length(lower_bounds),
+    length(freq_vars) == length(class_widths)
+  )
+  
+  data %>%
+    rowwise() %>%
+    mutate(
+      !!output_name := {
+        
+        freq <- c_across(all_of(freq_vars))
+        
+        N <- sum(freq, na.rm = TRUE)
+        
+        if (is.na(N) || N == 0) {
+          NA_real_
+        } else {
+          
+          cum_freq <- cumsum(freq)
+          
+          idx <- which(cum_freq >= N / 2)[1]
+          
+          prev_cum <- ifelse(
+            idx == 1,
+            0,
+            cum_freq[idx - 1]
+          )
+          
+          lower <- lower_bounds[idx]
+          
+          width <- class_widths[idx]
+          
+          lower +
+            (
+              (N / 2 - prev_cum) /
+                freq[idx]
+            ) * width
+        }
+      }
+    ) %>%
+    ungroup()
+}
+
 #===============================================================================
 # Housing Affordability Function
 #===============================================================================
@@ -70,8 +126,8 @@ build_housing_affordability <- function(
     output = "wide"
   ) %>%
     dplyr::mutate(
-      ratio_less4 = round(S2506_C01_027E/S2506_C01_001E*100,2),
-      ratio_over4 = round(S2506_C01_028E/S2506_C01_001E*100,2)
+      mort_ratio_less4 = round(S2506_C01_027E/S2506_C01_001E*100,2),
+      mort_ratio_over4 = round(S2506_C01_028E/S2506_C01_001E*100,2)
     ) %>%
     dplyr::select(
       GEOID,
@@ -82,8 +138,8 @@ build_housing_affordability <- function(
       S2506_C01_028E, # Home Value to Household Income Ratio 4 or >
       S2506_C01_040E, # Owner Occupied Housing Units with Mortgage Monthly Housing Costs in Median Dollars
       S2506_C02_066E,  # Owner Occupied Housing Units with Mortgage Median Real Estate Taxes
-      ratio_less4,
-      ratio_over4
+      mort_ratio_less4,
+      mort_ratio_over4
     )
   
   #--------------------------------------------------------------------------
@@ -100,8 +156,8 @@ build_housing_affordability <- function(
     output = "wide"
   ) %>%
     dplyr::mutate(
-      ratio_less4 = round(S2507_C01_022E/S2507_C01_001E*100,2),
-      ratio_over4 = round(S2507_C01_023E/S2507_C01_001E*100,2)
+      nomort_ratio_less4 = round(S2507_C01_022E/S2507_C01_001E*100,2),
+      nomort_ratio_over4 = round(S2507_C01_023E/S2507_C01_001E*100,2)
     ) %>%
     dplyr::select(
       GEOID,
@@ -112,8 +168,8 @@ build_housing_affordability <- function(
       S2507_C01_023E, # Home Value to Household Income Ratio 4 or >
       S2507_C01_032E, # Owner Occupied Housing Units without Mortgage Monthly Housing Costs in Median Dollars
       S2507_C02_058E,  # Owner Occupied Housing Units without Mortgage Median Real Estate Taxes
-      ratio_less4,
-      ratio_over4
+      nomort_ratio_less4,
+      nomort_ratio_over4
     )
   
   #--------------------------------------------------------------------------
@@ -141,6 +197,219 @@ build_housing_affordability <- function(
       DP04_0101E, # Median SMOC with Mortgage
       DP04_0109E, # Median SMOC without Mortgage
       DP04_0134E   # Median Gross Rent
+    )
+  
+  #--------------------------------------------------------------------------
+  # Monthly Electricity Cost
+  #--------------------------------------------------------------------------
+  
+  elec_cost <- tidycensus::get_acs(
+    geography = geography,
+    state = state,
+    year = year,
+    survey = survey,
+    table = "B25132",
+    geometry = FALSE,
+    output = "wide"
+  ) %>%
+    calculate_grouped_median(
+      freq_vars = c(
+        "B25132_004E",
+        "B25132_005E",
+        "B25132_006E",
+        "B25132_007E",
+        "B25132_008E",
+        "B25132_009E"
+      ),
+      lower_bounds = c(
+        0,
+        50,
+        100,
+        150,
+        200,
+        250
+      ),
+      class_widths = c(
+        50,
+        50,
+        50,
+        50,
+        50,
+        50
+      ),
+      output_name = "median_electricity_cost"
+    ) %>%
+    dplyr::select(
+      GEOID,
+      median_electricity_cost
+    )
+  
+  #--------------------------------------------------------------------------
+  # Monthly Gas Costs
+  #---------------------------------------------------------------------------
+  gas_cost <- tidycensus::get_acs(
+      geography = geography,
+      state = state,
+      year = year,
+      survey = survey,
+      table = "B25133",
+      geometry = FALSE,
+      output = "wide"
+    ) %>%
+      calculate_grouped_median(
+        freq_vars = c(
+          "B25133_004E",
+          "B25133_005E",
+          "B25133_006E",
+          "B25133_007E",
+          "B25133_008E",
+          "B25133_009E"
+        ),
+        lower_bounds = c(
+          0,
+          25,
+          50,
+          75,
+          100,
+          150
+        ),
+        class_widths = c(
+          25,
+          25,
+          25,
+          25,
+          50,
+          50
+        ),
+        output_name = "median_gas_cost"
+      ) %>%
+      dplyr::select(
+        GEOID,
+        median_gas_cost
+      )
+  
+  #--------------------------------------------------------------------------
+  # Insurance Cost by Mortgage Status: Mortgage
+  #--------------------------------------------------------------------------
+  insurance_cost_mort <- tidycensus::get_acs(
+    geography = geography,
+    state = state,
+    year = year,
+    survey = survey,
+    table = "B25141",
+    geometry = FALSE,
+    output = "wide"
+  ) %>%
+    calculate_grouped_median(
+     freq_vars = c(
+       "B25141_003E",
+       "B25141_004E",
+       "B25141_005E",
+       "B25141_006E",
+       "B25141_007E",
+       "B25141_008E",
+       "B25141_009E",
+       "B25141_010E",
+       "B25141_011E",
+       "B25141_012E",
+       "B25141_013E",
+       "B25141_014E"
+     ),
+     lower_bounds = c(
+       0,
+       100,
+       300,
+       500,
+       800,
+       1000,
+       1500,
+       2000,
+       2500,
+       3000,
+       3500,
+       4000
+     ),
+     class_widths = c(
+       100,
+       200,
+       200,
+       300,
+       200,
+       500,
+       500,
+       500,
+       500,
+       500,
+       500,
+       500
+     ),
+     output_name = "median_insurance_cost_mortgage"
+    ) %>%
+    dplyr::select(
+      GEOID,
+      median_insurance_cost_mortgage
+    )
+
+  #--------------------------------------------------------------------------
+  # Insurance Cost by Mortgage Status: No Mortgage
+  #--------------------------------------------------------------------------
+  insurance_cost_nomort <- tidycensus::get_acs(
+    geography = geography,
+    state = state,
+    year = year,
+    survey = survey,
+    table = "B25141",
+    geometry = FALSE,
+    output = "wide"
+  ) %>%
+    calculate_grouped_median(
+      freq_vars = c(
+        "B25141_016E",
+        "B25141_017E",
+        "B25141_018E",
+        "B25141_019E",
+        "B25141_020E",
+        "B25141_021E",
+        "B25141_022E",
+        "B25141_023E",
+        "B25141_024E",
+        "B25141_025E",
+        "B25141_026E",
+        "B25141_027E"
+      ),
+      lower_bounds = c(
+        0,
+        100,
+        300,
+        500,
+        800,
+        1000,
+        1500,
+        2000,
+        2500,
+        3000,
+        3500,
+        4000
+      ),
+      class_widths = c(
+        100,
+        200,
+        200,
+        300,
+        200,
+        500,
+        500,
+        500,
+        500,
+        500,
+        500,
+        500
+      ),
+      output_name = "median_insurance_cost_nomortgage"
+    ) %>%
+    dplyr::select(
+      GEOID,
+      median_insurance_cost_nomortgage
     )
   
   #--------------------------------------------------------------------------
@@ -268,10 +537,14 @@ build_housing_affordability <- function(
   
   data_list <- list(
     burden,
+    hisp_burden,
     cost_mort,
     cost_nomort,
     hous_char,
-    hisp_burden,
+    elec_cost,
+    gas_cost,
+    insurance_cost_mort,
+    insurance_cost_nomort,
     hisp_calc
   )
   

@@ -37,12 +37,17 @@ legislature_affordability <- build_housing_affordability(
 
 ```{r Export legislature housing cost data, message=FALSE, warning=FALSE}
 
-# export_housing_affordability(
-#   data = legislature_affordability,
-#   geography = "state legislative district (lower chamber)",
-#   state = "NY",
-#   year = 2024
-# )
+export_housing_affordability(
+  data = legislature_affordability,
+  geography = "state legislative district (lower chamber)",
+  state = "NY",
+  year = 2024
+)
+
+st_write(legislature_affordability,
+         dsn = file.path(here::here("output"),
+                         "legislature_housing_affordability.gpkg"),
+         delete_dsn = TRUE)
 ```
 
 ## Display Burden Data Total Population

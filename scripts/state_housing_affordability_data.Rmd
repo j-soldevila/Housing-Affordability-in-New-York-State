@@ -37,12 +37,12 @@ state_affordability <- build_housing_affordability(
 
 ```{r Export state housing cost data, message=FALSE, warning=FALSE}
 
-# export_housing_affordability(
-#   data = state_affordability,
-#   geography = "state",
-#   state = "NY",
-#   year = 2024
-# )
+export_housing_affordability(
+  data = state_affordability,
+  geography = "state",
+  state = "NY",
+  year = 2024
+)
 ```
 
 ## Display Burden Data Total Population
