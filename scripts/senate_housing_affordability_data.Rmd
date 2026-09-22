@@ -36,13 +36,18 @@ senate_affordability <- build_housing_affordability(
 ### Export County housing cost burden
 
 ```{r Export senate housing cost data, message=FALSE, warning=FALSE}
+# 
+# export_housing_affordability(
+#   data = senate_affordability,
+#   geography = "state legislative district (upper chamber)",
+#   state = "NY",
+#   year = 2024
+# )
 
-export_housing_affordability(
-  data = senate_affordability,
-  geography = "state legislative district (upper chamber)",
-  state = "NY",
-  year = 2024
-)
+st_write(senate_affordability,
+         dsn = file.path(here::here("output"),
+                         "senate_housing_affordability.gpkg"),
+         delete_dsn = TRUE)
 ```
 
 ## Display Burden Data Total Population
