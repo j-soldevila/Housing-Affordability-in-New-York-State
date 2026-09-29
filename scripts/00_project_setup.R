@@ -196,7 +196,8 @@ build_housing_affordability <- function(
       DP04_0047E, # Total Renter Occupied Housing Units
       DP04_0101E, # Median SMOC with Mortgage
       DP04_0109E, # Median SMOC without Mortgage
-      DP04_0134E   # Median Gross Rent
+      DP04_0134E,   # Median Gross Rent
+      DP04_0142PE #GRAPI > 35%
     )
   
   #--------------------------------------------------------------------------
@@ -631,13 +632,15 @@ interactive_housing_map <- function(
   # Color Palette
   #---------------------------------------------------------------------------
   
-  pal <- leaflet::colorNumeric(
+  pal <- leaflet::colorBin(
     palette = viridisLite::viridis(
       n = 256,
       option = palette,
       direction = ifelse(reverse_palette, -1, 1)
     ),
     domain = data[[variable]],
+    bins = 5,
+    pretty = FALSE,
     na.color = "#D3D3D3"
   )
 

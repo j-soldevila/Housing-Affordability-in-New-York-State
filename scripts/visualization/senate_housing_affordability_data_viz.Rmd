@@ -315,7 +315,7 @@ interactive_housing_map(
 
 interactive_housing_map(
   data = senate_affordability,
-  variable = "ratio_less4.y",
+  variable = "nomort_ratio_less4",
   title = "Ratio 3 to 3.9"
 )
 ```
@@ -326,7 +326,7 @@ interactive_housing_map(
 
 interactive_housing_map(
   data = senate_affordability,
-  variable = "ratio_over4.y",
+  variable = "nomort_ratio_over4",
   title = "Ratio 3 to 3.9"
 )
 ```
@@ -387,7 +387,7 @@ interactive_housing_map(
 
 ### GRAPI
 
-```{r Median Gross Rent, message=FALSE, warning=FALSE}
+```{r GRAPI, message=FALSE, warning=FALSE}
 interactive_housing_map(
   data = senate_affordability,
   variable = "DP04_0142PE",
