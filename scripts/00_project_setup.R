@@ -2,7 +2,7 @@
 
 # 1. Load Libraries
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load(tidyverse, tidycensus,sf,glue,here,leaflet)
+pacman::p_load(tidyverse,tidycensus,sf,glue,here,leaflet)
 
 
 #===============================================================================
@@ -96,15 +96,20 @@ build_housing_affordability <- function(
           B25140_001E * 100,2),
       tot_50pct    = round(
         (B25140_004E + B25140_008E + B25140_012E) /
-          B25140_001E * 100,2)
+          B25140_001E * 100,2),
+      pct_occ = 
     ) %>%
     dplyr::select(
       GEOID,
       NAME,
+      B25140_001E,  # Total Housing Units
+      B25140_002E,  # Total Owned Housing Units with Mortgage
       mort_30pct,
       mort_50pct,
+      B25140_006E,  # Total Owned Housing Units without Mortgage
       nomort_30pct,
       nomort_50pct,
+      B25140_010E,  # Total Rented Housing Units
       rent_30pct,
       rent_50pct,
       tot_30pct,
@@ -189,15 +194,27 @@ build_housing_affordability <- function(
       GEOID,
       DP04_0001E, # Total Housing Units
       DP04_0002E, # Occupied Housing Units
+      DP04_0002PE, # Percent Occupied Housing Units
       DP04_0003E, # Vacant Housing Units
+      DP04_0003PE, # Percent Vacant Housing Units
       DP04_0004E, # Homeowner Vacancy Rate
       DP04_0005E, # Renter Vacancy Rate
       DP04_0046E, # Total Owner Occupied Housing Units
       DP04_0047E, # Total Renter Occupied Housing Units
+      DP04_0047PE, # Percent Total Renter Occupied Housing Units
+      DP04_0090E, # Owner-Occupied Housing Units
+      DP04_0090PE, # Percent Owner-Occupied Housing Units
+      DP04_0091E, # Owner-Occupied Housing Units with a Mortgage
+      DP04_0091PE, # Percent Owner-Occupied Housing Units with a Mortgage
+      DP04_0092E, # Owner-Occupied Housing Units without a Mortgage
+      DP04_0092PE, # Percent Owner-Occupied Housing Units without a Mortgage
       DP04_0101E, # Median SMOC with Mortgage
       DP04_0109E, # Median SMOC without Mortgage
       DP04_0134E,   # Median Gross Rent
-      DP04_0142PE #GRAPI > 35%
+      DP04_0115E,   # SMOCAPI with mortgage > 35%
+      DP04_0124E,   # SMOCAPI without mortgage > 35%
+      DP04_0142PE, #GRAPI > 35%
+      DP04_0134E, #Median Gross Rent
     )
   
   #--------------------------------------------------------------------------
@@ -442,6 +459,10 @@ build_housing_affordability <- function(
     ) %>%
     dplyr::select(
       GEOID,
+      B25140I_001E,  # Total Housing Units
+      B25140I_002E,  # Total Owned Housing Units with Mortgage
+      B25140I_006E,  # Total Owned Housing Units without Mortgage
+      B25140I_010E,  # Total Rented Housing Units
       starts_with("hisp_")
     )
   
@@ -523,7 +544,8 @@ build_housing_affordability <- function(
     ) %>%
     dplyr::select(
       GEOID,
-      DP05_0089E,
+      DP05_0001E, # Total Population
+      DP05_0090E, # Total Hispanic Population
       pct_hisp,
       pct_wht,
       pct_blk,
@@ -666,9 +688,10 @@ interactive_housing_map <- function(
   
   leaflet::leaflet(data) %>%
     
-    leaflet::addProviderTiles(
-      provider = basemap
-    ) %>%
+    # leaflet::addProviderTiles(
+    #   provider = basemap
+    # ) %>%
+    leaflet::addTiles() %>%
     
     leaflet::addPolygons(
       fillColor = ~pal(map_value),
