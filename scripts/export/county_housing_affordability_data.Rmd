@@ -49,10 +49,10 @@ export_housing_affordability(
 
 ```{r Export selected variables for Data brief, message=FALSE, warning=FALSE}
 
-county_affordability <- 
+county_affordability_table <- 
   county_affordability %>% 
   select(
-    GEOID, 
+    NAME,
     DP05_0001E, # Total Population
     DP05_0090E, # Total Hispanic Population
     pct_hisp,   # Percent Hispanic Population
@@ -66,10 +66,10 @@ county_affordability <-
     DP04_0091PE, # Percent Owner-Occupied Housing Units with a Mortgage
     DP04_0092PE, # Percent Owner-Occupied Housing Units without a Mortgage
     DP04_0047PE, # Percent Total Renter Occupied Housing Units
-    # Median Household Income
+    # Median Household Income - Missing
     S2506_C01_024E, # Owner Occupied Housing Units with Mortgage Median Household Income
     S2507_C01_019E, # Owner Occupied Housing Units without Mortgage Median Household Income
-    # Median Household Income for Renter-Occupied Housing Units
+    # Median Household Income for Renter-Occupied Housing Units - Missing
     S2506_C01_040E, # Owner Occupied Housing Units with Mortgage Monthly Housing Costs in Median Dollars
     S2507_C01_032E, # Owner Occupied Housing Units without Mortgage Monthly Housing Costs in Median Dollars
     DP04_0134E, #Median Gross Rent ($)
@@ -98,7 +98,14 @@ county_affordability <-
     DP04_0142PE, #GRAPI > 35%
     S2506_C01_009E, # Owner Occupied Housing Units with Mortgage Median Home Value
     S2507_C01_010E, # Owner Occupied Housing Units without Mortgage Median Home Value
-         )
+         ) %>% 
+  st_drop_geometry() %>%
+  arrange(NAME) %>%
+  column_to_rownames("NAME") %>%
+  t() %>%
+  as.data.frame()
+
+write.csv(county_affordability_table,"county_affordability_table.csv")
 ```
 
 

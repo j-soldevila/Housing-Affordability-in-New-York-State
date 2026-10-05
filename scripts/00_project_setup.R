@@ -96,8 +96,7 @@ build_housing_affordability <- function(
           B25140_001E * 100,2),
       tot_50pct    = round(
         (B25140_004E + B25140_008E + B25140_012E) /
-          B25140_001E * 100,2),
-      pct_occ = 
+          B25140_001E * 100,2)
     ) %>%
     dplyr::select(
       GEOID,
@@ -214,7 +213,7 @@ build_housing_affordability <- function(
       DP04_0115E,   # SMOCAPI with mortgage > 35%
       DP04_0124E,   # SMOCAPI without mortgage > 35%
       DP04_0142PE, #GRAPI > 35%
-      DP04_0134E, #Median Gross Rent
+      DP04_0134E #Median Gross Rent
     )
   
   #--------------------------------------------------------------------------
