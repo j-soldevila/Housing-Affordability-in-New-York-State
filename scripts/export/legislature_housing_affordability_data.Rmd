@@ -38,15 +38,90 @@ assembly_affordability <- build_housing_affordability(
 ```{r Export legislature housing cost data, message=FALSE, warning=FALSE}
 
 export_housing_affordability(
-  data = assembl_affordability,
+  data = assembly_affordability,
   geography = "state legislative district (lower chamber)",
   state = "NY",
   year = 2024
 )
 
-st_write(legislature_affordability,
+st_write(assembly_affordability,
          dsn = file.path(here::here("output"),
                          "legislature_housing_affordability.gpkg"),
          delete_dsn = TRUE)
 ```
+
+## Table Export
+
+```{r Export selected variables for Data brief, message=FALSE, warning=FALSE}
+
+assembly_affordability_total_table <- 
+  assembly_affordability %>% 
+  select(
+    NAME,
+    DP05_0001E, # Total Population
+    DP04_0001E, # Total Housing Units
+    DP04_0002E, # Occupied Housing Units
+    DP04_0002PE, # Percent Occupied Housing Units
+    DP04_0090E, # Owner-Occupied Housing Units
+    DP04_0091E, # Owner-Occupied Housing Units with a Mortgage
+    DP04_0092E, # Owner-Occupied Housing Units without a Mortgage
+    DP04_0047E, # Total Renter Occupied Housing Units
+    DP04_0091PE, # Percent Owner-Occupied Housing Units with a Mortgage
+    DP04_0092PE, # Percent Owner-Occupied Housing Units without a Mortgage
+    DP04_0047PE, # Percent Total Renter Occupied Housing Units
+    # Median Household Income - Missing
+    S2506_C01_024E, # Owner Occupied Housing Units with Mortgage Median Household Income
+    S2507_C01_019E, # Owner Occupied Housing Units without Mortgage Median Household Income
+    # Median Household Income for Renter-Occupied Housing Units - Missing
+    S2506_C01_040E, # Owner Occupied Housing Units with Mortgage Monthly Housing Costs in Median Dollars
+    S2507_C01_032E, # Owner Occupied Housing Units without Mortgage Monthly Housing Costs in Median Dollars
+    DP04_0134E, #Median Gross Rent ($)
+    B25140_001E,  # Total Housing Units
+    B25140_002E,  # Total Owned Housing Units with Mortgage
+    mort_30pct,
+    mort_50pct,
+    B25140_006E,  # Total Owned Housing Units without Mortgage
+    nomort_30pct,
+    nomort_50pct,
+    B25140_010E,  # Total Rented Housing Units
+    rent_30pct,
+    rent_50pct,
+    DP04_0115E,   # SMOCAPI with mortgage > 35%
+    DP04_0124E,   # SMOCAPI without mortgage > 35%
+    DP04_0142PE, #GRAPI > 35%
+    S2506_C01_009E, # Owner Occupied Housing Units with Mortgage Median Home Value
+    S2507_C01_010E, # Owner Occupied Housing Units without Mortgage Median Home Value
+         ) %>% 
+  st_drop_geometry() %>%
+  arrange(NAME) %>%
+  column_to_rownames("NAME") %>%
+  t() %>%
+  as.data.frame()
+
+assembly_affordability_hisp_table <- 
+  assembly_affordability %>% 
+  select(
+    NAME,
+    DP05_0090E, # Total Hispanic Population
+    pct_hisp,   # Percent Hispanic Population
+    B25140I_001E,  # Total Hispanic Housing Units
+    B25140I_002E,  # Total Hispanic Owned Housing Units with Mortgage
+    hisp_mort_30pct,
+    hisp_mort_50pct,
+    B25140I_006E,  # Total Hispanic Owned Housing Units without Mortgage
+    hisp_nomort_30pct,
+    hisp_nomort_50pct,
+    B25140I_010E,  # Total Hispanic Rented Housing Units
+    hisp_rent_30pct,
+    hisp_rent_50pct) %>% 
+  st_drop_geometry() %>%
+  arrange(NAME) %>%
+  column_to_rownames("NAME") %>%
+  t() %>%
+  as.data.frame()
+
+write.csv(assembly_affordability_total_table,"assembly_affordability_total_table.csv")
+write.csv(assembly_affordability_hisp_table,"assembly_affordability_hisp_table.csv")
+```
+
 
