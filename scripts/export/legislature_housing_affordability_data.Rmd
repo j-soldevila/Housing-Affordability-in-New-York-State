@@ -66,6 +66,8 @@ assembly_affordability_total_table <-
     DP04_0091E, # Owner-Occupied Housing Units with a Mortgage
     DP04_0092E, # Owner-Occupied Housing Units without a Mortgage
     DP04_0047E, # Total Renter Occupied Housing Units
+    DP04_0047E, # Total Renter Occupied Housing Units
+    DP04_0092E, # Owner-Occupied Housing Units without a Mortgage
     DP04_0091PE, # Percent Owner-Occupied Housing Units with a Mortgage
     DP04_0092PE, # Percent Owner-Occupied Housing Units without a Mortgage
     DP04_0047PE, # Percent Total Renter Occupied Housing Units
@@ -86,14 +88,18 @@ assembly_affordability_total_table <-
     B25140_010E,  # Total Rented Housing Units
     rent_30pct,
     rent_50pct,
-    DP04_0115E,   # SMOCAPI with mortgage > 35%
-    DP04_0124E,   # SMOCAPI without mortgage > 35%
+    rent_50pct,
+    DP04_0115PE,   # SMOCAPI with mortgage > 35%
+    DP04_0124PE,   # SMOCAPI without mortgage > 35%
     DP04_0142PE, #GRAPI > 35%
     S2506_C01_009E, # Owner Occupied Housing Units with Mortgage Median Home Value
     S2507_C01_010E, # Owner Occupied Housing Units without Mortgage Median Home Value
          ) %>% 
   st_drop_geometry() %>%
-  arrange(NAME) %>%
+  mutate(NAME_clean = str_extract(NAME, "Assembly District \\d+"),
+         district = as.numeric(str_extract(NAME, "\\d+"))
+         ) %>%
+  arrange(district) %>%
   column_to_rownames("NAME") %>%
   t() %>%
   as.data.frame()
@@ -115,13 +121,17 @@ assembly_affordability_hisp_table <-
     hisp_rent_30pct,
     hisp_rent_50pct) %>% 
   st_drop_geometry() %>%
-  arrange(NAME) %>%
+  mutate(NAME_clean = str_extract(NAME, "Assembly District \\d+"),
+         district = as.numeric(str_extract(NAME, "\\d+"))
+         ) %>%
+  arrange(district) %>%
   column_to_rownames("NAME") %>%
   t() %>%
   as.data.frame()
 
 write.csv(assembly_affordability_total_table,"assembly_affordability_total_table.csv")
 write.csv(assembly_affordability_hisp_table,"assembly_affordability_hisp_table.csv")
+
 ```
 
 

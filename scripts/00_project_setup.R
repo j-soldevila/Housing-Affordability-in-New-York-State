@@ -210,8 +210,8 @@ build_housing_affordability <- function(
       DP04_0101E, # Median SMOC with Mortgage
       DP04_0109E, # Median SMOC without Mortgage
       DP04_0134E,   # Median Gross Rent
-      DP04_0115E,   # SMOCAPI with mortgage > 35%
-      DP04_0124E,   # SMOCAPI without mortgage > 35%
+      DP04_0115PE,   # SMOCAPI with mortgage > 35%
+      DP04_0124PE,   # SMOCAPI without mortgage > 35%
       DP04_0142PE, #GRAPI > 35%
       DP04_0134E #Median Gross Rent
     )
