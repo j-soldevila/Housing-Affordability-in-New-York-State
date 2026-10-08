@@ -52,17 +52,15 @@ export_housing_affordability(
 tract_affordability_table <- 
   tract_affordability %>% 
   select(
-    NAME, 
+   NAME,
     DP05_0001E, # Total Population
-    DP05_0090E, # Total Hispanic Population
-    pct_hisp,   # Percent Hispanic Population
     DP04_0001E, # Total Housing Units
     DP04_0002E, # Occupied Housing Units
     DP04_0002PE, # Percent Occupied Housing Units
     DP04_0090E, # Owner-Occupied Housing Units
     DP04_0091E, # Owner-Occupied Housing Units with a Mortgage
-    DP04_0047E, # Total Renter Occupied Housing Units
     DP04_0092E, # Owner-Occupied Housing Units without a Mortgage
+    DP04_0047E, # Total Renter Occupied Housing Units
     DP04_0091PE, # Percent Owner-Occupied Housing Units with a Mortgage
     DP04_0092PE, # Percent Owner-Occupied Housing Units without a Mortgage
     DP04_0047PE, # Percent Total Renter Occupied Housing Units
@@ -83,18 +81,8 @@ tract_affordability_table <-
     B25140_010E,  # Total Rented Housing Units
     rent_30pct,
     rent_50pct,
-    B25140I_001E,  # Total Hispanic Housing Units
-    B25140I_002E,  # Total Hispanic Owned Housing Units with Mortgage
-    hisp_mort_30pct,
-    hisp_mort_50pct,
-    B25140I_006E,  # Total Hispanic Owned Housing Units without Mortgage
-    hisp_nomort_30pct,
-    hisp_nomort_50pct,
-    B25140I_010E,  # Total Hispanic Rented Housing Units
-    hisp_rent_30pct,
-    hisp_rent_50pct,
-    DP04_0115E,   # SMOCAPI with mortgage > 35%
-    DP04_0124E,   # SMOCAPI without mortgage > 35%
+    DP04_0115PE,   # SMOCAPI with mortgage > 35%
+    DP04_0124PE,   # SMOCAPI without mortgage > 35%
     DP04_0142PE, #GRAPI > 35%
     S2506_C01_009E, # Owner Occupied Housing Units with Mortgage Median Home Value
     S2507_C01_010E, # Owner Occupied Housing Units without Mortgage Median Home Value

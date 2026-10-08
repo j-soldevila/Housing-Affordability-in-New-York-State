@@ -61,8 +61,6 @@ county_affordability_total_table <-
     DP04_0091E, # Owner-Occupied Housing Units with a Mortgage
     DP04_0092E, # Owner-Occupied Housing Units without a Mortgage
     DP04_0047E, # Total Renter Occupied Housing Units
-    DP04_0047E, # Total Renter Occupied Housing Units
-    DP04_0092E, # Owner-Occupied Housing Units without a Mortgage
     DP04_0091PE, # Percent Owner-Occupied Housing Units with a Mortgage
     DP04_0092PE, # Percent Owner-Occupied Housing Units without a Mortgage
     DP04_0047PE, # Percent Total Renter Occupied Housing Units

@@ -61,8 +61,6 @@ state_affordability_total_table <-
     DP04_0091E, # Owner-Occupied Housing Units with a Mortgage
     DP04_0092E, # Owner-Occupied Housing Units without a Mortgage
     DP04_0047E, # Total Renter Occupied Housing Units
-    DP04_0047E, # Total Renter Occupied Housing Units
-    DP04_0092E, # Owner-Occupied Housing Units without a Mortgage
     DP04_0091PE, # Percent Owner-Occupied Housing Units with a Mortgage
     DP04_0092PE, # Percent Owner-Occupied Housing Units without a Mortgage
     DP04_0047PE, # Percent Total Renter Occupied Housing Units
@@ -82,7 +80,6 @@ state_affordability_total_table <-
     nomort_50pct,
     B25140_010E,  # Total Rented Housing Units
     rent_30pct,
-    rent_50pct,
     rent_50pct,
     DP04_0115PE,   # SMOCAPI with mortgage > 35%
     DP04_0124PE,   # SMOCAPI without mortgage > 35%
